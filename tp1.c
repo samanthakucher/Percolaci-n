@@ -10,7 +10,6 @@
 
 void llenar(int *red, int n, float prob);
 void imprimir(int *red, int n);
-int numeros(float P); // meter en llenar
 int   actualizar(int *red,int *clase,int s,int frag);
 void  etiqueta_falsa(int *red,int *clase,int s1,int s2);
 void  corregir_etiqueta(int *red,int *clase,int n);
@@ -50,20 +49,15 @@ int main(){
 	return 0;
 }
 
-int numeros(float P){
-	int n;
-	n = 0;
-	float res = (float)rand()/(float)RAND_MAX;
-	if(res<P){
-		n=1;
-	}
-	return n;
-}
- 
 void llenar(int *red, int n, float prob){
 	int i;
+	float res;
 	for(i=0; i<n*n; i++) {
-			red[i] = numeros(prob);
+		red[i] = 0;
+		res = (float)rand()/(float)RAND_MAX;
+		if(res<prob){
+			red[i] = 1;
+		}
 	}
 }
 
