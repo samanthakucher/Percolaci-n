@@ -5,38 +5,42 @@
 
 #define P     16             // 1/2^P, P=16
 #define Z     27000          // iteraciones
-#define N     30             // lado de la red simulada
+#define N     6            // lado de la red simulada
 
 
 void llenar(int *red, int n, float prob);
 void imprimir(int *red, int n);
+int hoshen(int *red,int n);
 int   actualizar(int *red,int *clase,int s,int frag);
 void  etiqueta_falsa(int *red,int *clase,int s1,int s2);
 void  corregir_etiqueta(int *red,int *clase,int n);
 int   percola(int *red,int n);
-
+void imprimir_clase(int *clase, int frag);
 
 int main(){
-	int i, j, *red, n, z;
+	int i, j, *red, *red_ini, n, z;
 	float prob, denominador;
 	n=N;
   	z=Z;
 	red = (int *)malloc(n*n*sizeof(int));
+  red_ini = (int *)malloc(n*n*sizeof(int)); 
 /*
   for(i=0;i<z;i++)
     {*/
-      prob=0.5;
-      denominador=2.0;
+  prob=0.7;
+  denominador=2.0;
  
-      srand(time(NULL));
+  srand(time(NULL));
 /*
       for(j=0;j<P;j++) //no menos de 13 iteraciones (P>13)
         {*/
-          llenar(red,n,prob);
-      
-          hoshen(red,n);
-        
-          denominador=2.0*denominador;
+  llenar(red,n,prob);
+
+  for(i=0;i<n*n;i++) red_ini[i] = red[i]; 
+
+  imprimir(red_ini,n);
+  hoshen(red,n);      
+  //      denominador=2.0*denominador;
 /*
           if (percola(red,n)) 
              prob+=(-1.0/denominador); 
@@ -46,8 +50,10 @@ int main(){
        }
     }
 */
-  free(red);
-	imprimir(red, n);
+
+	printf("\n \n");
+  imprimir(red, n);
+	free(red);
 	return 0;
 }
 
@@ -67,13 +73,25 @@ void imprimir(int *red, int n){
 	int i, j;
 	for(i=0; i<n; i++){ 
 		for(j=0; j<n; j++){ 
-			printf("%i ", red[i*n+j]); //Si le pongo \t deja un espacio
+			printf("%i   ", red[i*n+j]); //Si le pongo \t deja un espacio
 		}
 	printf("\n");
 	}
 }
+
 int   actualizar(int *red,int *clase,int s,int frag){
-	
+
+	while(clase[s]<0) s = -clase[s];
+
+	if(!s){
+		*red = frag;
+		clase[frag] = frag;
+		return frag+1;
+	}
+	else if(s){
+		*red = s;
+		return frag;
+	}
 }
 
 int hoshen(int *red,int n){
@@ -115,37 +133,107 @@ int hoshen(int *red,int n){
     {
 
       // primer elemento de cada fila
-
+      if (*(red+i)) 
+         {
+           s1=*(red+i-1); //el de arriba
+           frag=actualizar(red+i,clase,s1,frag);
+         }
       if (*(red+i)) 
          {
            s1=*(red+i-n); //el de arriba
            frag=actualizar(red+i,clase,s1,frag);
          }
 
-      for(j=1;j<n;j++)
-	if (*(red+i+j))
-	  {
-	    s1=*(red+i+j-1); 
+      for(j=1;j<n;j++){
+				if (*(red+i+j))
+	  		{
+	    			s1=*(red+i+j-1); 
             s2=*(red+i+j-n);
 
-	    if (s1*s2>0)
+	    	if (s1*s2>0)
 	      {
-		etiqueta_falsa(red+i+j,clase,s1,s2);
-	      }
-	    else 
+					etiqueta_falsa(red+i+j,clase,s1,s2);
+	     	}
+	    	else 
 	      { if (s1!=0) frag=actualizar(red+i+j,clase,s1,frag);
 	        else       frag=actualizar(red+i+j,clase,s2,frag);
 	      }
-	  }
-    }
+	  		}
+   		}
 
+    }
+  printf("\n \n");
 
   corregir_etiqueta(red,clase,n);
+  imprimir_clase(clase, frag);  
 
-  free(clase):
+  free(clase);
 
   return 0;
 }
 
 
+void etiqueta_falsa(int *red, int *clase, int s1, int s2){  // pone etiquetas falsas en vector auxiliar "clase"
 
+		while(clase[s1]<0) s1 = -clase[s1];
+		while(clase[s2]<0) s2 = -clase[s2];	
+		if(s2 > s1){
+			 clase[s2] = -s1;	
+			 *red = s1;		
+		}
+		else if (s2 < s1){
+			 clase[s1] = -s2;	
+			 *red = s2;	
+		}
+		else {
+			*red=s1;	
+		}	
+}
+
+void corregir_etiqueta(int *red, int *clase, int n){  // corrije etiquetas en la red.
+
+	int i,s;
+	for(i=0;i<n*n;i++){
+		s = red[i]; 
+		while(clase[s]<0) s = -clase[s];
+		red[i] = s;
+	
+	}
+
+/*	int s0, s1, s2, i, j;
+	for(i=1; i<n; i++){ 
+		for(j=1; j<n; j++){ 
+
+			if( red[i*n+j] && (red[i*n+j-n] || red[i*n+j-1]) ){
+				s1 = red[i*n+j-n];  s2 = red[i*n+j-1]; s0 = red[i*n+j];
+				while(clase[s1]<0)  s1 = -clase[s1];
+				while(clase[s2]<0)  s2 = -clase[s2];
+			
+				if(s1<=s2 && s1>0){
+					clase[s2] = -s1;
+					red[i*n+j] = s1;
+					red[i*n+j-1] = s1;
+					red[i*n+j-n] = s1;
+				}
+				else if(s2<=s1 && s2>0){
+					clase[s1] = -s2;
+					red[i*n+j] = s2;
+					red[i*n+j-1] = s2;
+					red[i*n+j-n] = s2;
+				}		
+				else if(s0 < s1){
+					clase[s1] = -s0;
+					red[i*n+j-n] = s0;
+				} 
+			}
+		}
+	}*/
+}
+
+void imprimir_clase(int *clase, int frag){
+	int k;
+	for(k=0;k<frag;k++){
+		printf("%d ",*(clase+k));
+	}
+	printf("\n ");
+}
