@@ -14,8 +14,9 @@ int hoshen(int *red,int n);
 int   actualizar(int *red,int *clase,int s,int frag);
 void  etiqueta_falsa(int *red,int *clase,int s1,int s2);
 void  corregir_etiqueta(int *red,int *clase,int n);
-int   percola(int *red,int n);
+int  percola(int *red,int n);
 void imprimir_clase(int *clase, int frag);
+void imprimir_extremos(int *arriba, int *abajo, int n);
 
 int main(){
 	int i, j, *red, *red_ini, n, z;
@@ -23,7 +24,7 @@ int main(){
 	n=N;
   	z=Z;
 	red = (int *)malloc(n*n*sizeof(int));
-  red_ini = (int *)malloc(n*n*sizeof(int)); 
+  	red_ini = (int *)malloc(n*n*sizeof(int)); 
 /*
   for(i=0;i<z;i++)
     {*/
@@ -52,7 +53,7 @@ int main(){
 */
 
 	printf("\n \n");
-  imprimir(red, n);
+  	imprimir(red, n);
 	free(red);
 	return 0;
 }
@@ -92,6 +93,55 @@ int   actualizar(int *red,int *clase,int s,int frag){
 		*red = s;
 		return frag;
 	}
+}
+
+void etiqueta_falsa(int *red, int *clase, int s1, int s2){  // pone etiquetas falsas en vector auxiliar "clase"
+
+		while(clase[s1]<0) s1 = -clase[s1];
+		while(clase[s2]<0) s2 = -clase[s2];	
+		if(s2 > s1){
+			 clase[s2] = -s1;	
+			 *red = s1;		
+		}
+		else if (s2 < s1){
+			 clase[s1] = -s2;	
+			 *red = s2;	
+		}
+		else {
+			*red=s1;	
+		}	
+}
+
+void corregir_etiqueta(int *red, int *clase, int n){  // corrije etiquetas en la red.
+
+	int i,s;
+	for(i=0;i<n*n;i++){
+		s = red[i]; 
+		while(clase[s]<0) s = -clase[s];
+		red[i] = s;
+	
+	}
+
+
+}
+
+int percola(int *red,int n){
+	int b, *arriba, *abajo; //, *izq, *der;
+	arriba = (int *)malloc(n*sizeof(int)); 
+	abajo= (int *)malloc(n*sizeof(int)); 
+	//izq = (int *)malloc(n*sizeof(int)); 
+	//der = (int *)malloc(n*sizeof(int)); 
+	for(b=0;b<n;b++){
+		arriba[b] = 0;
+		if(red[b]>0){
+			arriba[red[b]]=1; //Si hay un 2 en la 1era fila de red, pone un 1 en la posicion 2 de este vector
+			abajo[b] = 0;
+			abajo[red[n*n-n+b]]=1;
+		}
+	}
+//COMENTARIO: Deberian existir como mucho n clusters, o sea n numeros distintos en la matriz. 
+//Pero a veces pasa que un numero supera n. Entonces cuanto deberian medir los vectores arriba, abajo, etc?
+//Despues hay que restarlos para ver si percolo
 }
 
 int hoshen(int *red,int n){
@@ -165,7 +215,9 @@ int hoshen(int *red,int n){
   printf("\n \n");
 
   corregir_etiqueta(red,clase,n);
-  imprimir_clase(clase, frag);  
+  imprimir_clase(clase, frag); 
+//copio aca lo que dice percola asi lo imprime
+  imprimir_extremos(arriba, abajo, n); 
 
   free(clase);
 
@@ -173,67 +225,23 @@ int hoshen(int *red,int n){
 }
 
 
-void etiqueta_falsa(int *red, int *clase, int s1, int s2){  // pone etiquetas falsas en vector auxiliar "clase"
-
-		while(clase[s1]<0) s1 = -clase[s1];
-		while(clase[s2]<0) s2 = -clase[s2];	
-		if(s2 > s1){
-			 clase[s2] = -s1;	
-			 *red = s1;		
-		}
-		else if (s2 < s1){
-			 clase[s1] = -s2;	
-			 *red = s2;	
-		}
-		else {
-			*red=s1;	
-		}	
-}
-
-void corregir_etiqueta(int *red, int *clase, int n){  // corrije etiquetas en la red.
-
-	int i,s;
-	for(i=0;i<n*n;i++){
-		s = red[i]; 
-		while(clase[s]<0) s = -clase[s];
-		red[i] = s;
-	
-	}
-
-/*	int s0, s1, s2, i, j;
-	for(i=1; i<n; i++){ 
-		for(j=1; j<n; j++){ 
-
-			if( red[i*n+j] && (red[i*n+j-n] || red[i*n+j-1]) ){
-				s1 = red[i*n+j-n];  s2 = red[i*n+j-1]; s0 = red[i*n+j];
-				while(clase[s1]<0)  s1 = -clase[s1];
-				while(clase[s2]<0)  s2 = -clase[s2];
-			
-				if(s1<=s2 && s1>0){
-					clase[s2] = -s1;
-					red[i*n+j] = s1;
-					red[i*n+j-1] = s1;
-					red[i*n+j-n] = s1;
-				}
-				else if(s2<=s1 && s2>0){
-					clase[s1] = -s2;
-					red[i*n+j] = s2;
-					red[i*n+j-1] = s2;
-					red[i*n+j-n] = s2;
-				}		
-				else if(s0 < s1){
-					clase[s1] = -s0;
-					red[i*n+j-n] = s0;
-				} 
-			}
-		}
-	}*/
-}
-
 void imprimir_clase(int *clase, int frag){
 	int k;
 	for(k=0;k<frag;k++){
 		printf("%d ",*(clase+k));
+	}
+	printf("\n ");
+}
+
+void imprimir_extremos(int *arriba, int *abajo, int n){
+	int k;
+	for(k=0;k<n;k++){
+		printf("%d ",*(arriba+k));
+	}
+	printf("\n ");
+
+for(k=0;k<n;k++){
+		printf("%d ",*(abajo+k));
 	}
 	printf("\n ");
 }
