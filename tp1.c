@@ -5,7 +5,7 @@
 
 #define P     16             // 1/2^P, P=16
 #define Z     27000          // iteraciones
-#define N     6            // lado de la red simulada
+#define N     4           // lado de la red simulada
 
 
 void llenar(int *red, int n, float prob);
@@ -63,21 +63,31 @@ int main(){
 
 int percola(int *red, int n){
 
-	int i, j, *aux, *aux2;
+	int i, j, *aux, *aux2, *aux3, *aux4;
 	aux = (int *)malloc(n*sizeof(int));
 	aux2 = (int *)malloc(n*sizeof(int));
+	aux3 = (int *)malloc(n*sizeof(int));
+	aux4 = (int *)malloc(n*sizeof(int));
 
 	for (i=0; i<n; i++){ 
-		aux[i] = red[i];
-		aux2[i] = red[(n-1)*n + i];
+		aux[i] = red[i]; //1era fila
+		aux2[i] = red[(n-1)*n + i]; //ultima fila
+	}
+
+	for (i=0; i<n; i++){ 
+		for(j=0;j<n*n;j=j+n){
+			aux3[i] = red[j]; //1era columna //No estan bien definidas
+			aux4[i] = red[(n-1) + j]; //ultima columna
+		}
 	}
 
 	for (i=0; i<n; i++){
 		for (j=0;j<n;j++){
-			if((aux[i] - aux2[j] == 0) && aux[i]>0) { return 1; continue; }
-		}
+			if(((aux[i] - aux2[j] == 0) && aux[i]>0)||((aux3[i] - aux4[j] == 0) && aux3[i]>0))  { return 1; continue; }
+			}
 	}
-	free(aux); free(aux2);
+	
+	free(aux); free(aux2), free(aux3); free(aux4);
 	return 0;
 }
 
@@ -85,21 +95,26 @@ int percola(int *red, int n){
 
 void llenar(int *red, int n, float prob){
 	int i;
-	float res;
+	//float res;
 	for(i=0; i<n*n; i++) {
 		red[i] = 0;
-		res = (float)rand()/(float)RAND_MAX;
+		/*res = (float)rand()/(float)RAND_MAX;
 		if(res<prob){
 			red[i] = 1;
-		}
+		}*/
 	}
+//Pongo una matriz a eleccion, que deberia percolar
+	for(i=n; i<2*n; i++) {
+		red[i]=1; 
+	}
+	
 }
 
 void imprimir(int *red, int n){
 	int i, j;
 	for(i=0; i<n; i++){ 
 		for(j=0; j<n; j++){ 
-			printf("%i   ", red[i*n+j]); //Si le pongo \t deja un espacio
+			printf("%i  ", red[i*n+j]); //Si le pongo \t deja un espacio
 		}
 	printf("\n");
 	}
