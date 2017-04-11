@@ -1,11 +1,18 @@
+
+
+	for(k=0;k<frag;k++){
+		printf("%d ",*(clase+k));
+	}
+	printf("\n ");
+}
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
 
 #define P     16             // 1/2^P, P=16
-#define Z     27000          // iteraciones
-#define N     4           // lado de la red simulada
+#define Z     100          // iteraciones    27000
+#define N     4          // lado de la red simulada
 
 
 void llenar(int *red, int n, float prob);
@@ -20,74 +27,68 @@ void imprimir_aux(int *aux, int n);
 int percola(int *red, int n);
 
 int main(){
-	int i, j, *red, *red_ini, n, z;
-	float prob, denominador;
-	n=N;
+	  int i, j, *red, *red_ini, n, z;
+	  float semilla, prob, denominador;
+	  n=N;
   	z=Z;
-	red = (int *)malloc(n*n*sizeof(int));
+	  red = (int *)malloc(n*n*sizeof(int));
   	red_ini = (int *)malloc(n*n*sizeof(int)); 
-/*
+		semilla = 1.0; //time(NULL);
+		FILE *f1;
+		f1 = fopen("L10.txt", "a");  // Archivo con valores de "p" que percolan, para red de dim L. (CAMBIAR PARA CADA L)
+
   for(i=0;i<z;i++)
-    {*/
- 	prob=0.5;
+    {
+ 	  prob=0.5;
   	denominador=2.0;
  
-  	srand(time(NULL));
-/*
-      for(j=0;j<P;j++) //no menos de 13 iteraciones (P>13)
-        {*/
-  	llenar(red,n,prob);
+  	srand(semilla);
+	  semilla++; 
+    for(j=0;j<P;j++) //no menos de 13 iteraciones (P>13)
+        {
+  				llenar(red,n,prob);
 
-  	for(i=0;i<n*n;i++) red_ini[i] = red[i]; 
+// 				for(i=0;i<n*n;i++) red_ini[i] = red[i]; 
 
-  	imprimir(red_ini,n);
-  	hoshen(red,n);     
-   if (percola(red,n)==1) printf("PERCOLO WACHO!");
-	else printf("NO PERCOLO NADAAA!"); 
-  //      denominador=2.0*denominador;
-/*
-          if (percola(red,n)) 
-             prob+=(-1.0/denominador); 
-          else prob+=(1.0/denominador);
+// 				imprimir(red_ini,n);
+  				hoshen(red,n);     
+    /*			if (percola(red,n)==1) printf("PERCOLO WACHO!");
+	  			else printf("NO PERCOLO NADAAA!"); */ 
+          denominador=2.0*denominador;
 
-		//ir guardando en cada paso prob/N que percolan 
-       }
-    }
-*/
-
-	printf("\n \n");
+          if (percola(red,n)) prob+=(-1.0/denominador);					
+	        else prob+=(1.0/denominador);
+		      //ir guardando en cada paso prob/N que percolan 
+        }
+		 fprintf(f1,"%f \n", prob);	
+     }
+	  printf("\n \n");
   	imprimir(red, n);
-	free(red);
-	return 0;
+		fclose(f1);
+	  free(red);
+	  return 0;
 }
 
-int percola(int *red, int n){
+int percola(int *red, int n){ //  Ver después el tema de mover índices
 
-	int i, j, *aux, *aux2, *aux3, *aux4;
+	int i, j, *aux, *aux2;
 	aux = (int *)malloc(n*sizeof(int));
 	aux2 = (int *)malloc(n*sizeof(int));
-	aux3 = (int *)malloc(n*sizeof(int));
-	aux4 = (int *)malloc(n*sizeof(int));
+
 
 	for (i=0; i<n; i++){ 
 		aux[i] = red[i]; //1era fila
 		aux2[i] = red[(n-1)*n + i]; //ultima fila
 	}
 
-	for (i=0; i<n; i++){ 
-		for(j=0;j<n*n;j=j+n){
-			aux3[i] = red[j]; //1era columna //No estan bien definidas
-			aux4[i] = red[(n-1) + j]; //ultima columna
-		}
-	}
-
+	
 	for (i=0; i<n; i++){
 		for (j=0;j<n;j++){
-			if(((aux[i] - aux2[j] == 0) && aux[i]>0)||((aux3[i] - aux4[j] == 0) && aux3[i]>0))  { return 1; continue; }
-			}
+			if((aux[i] - aux2[j] == 0) && aux[i]>0)  { return 1; continue; }
+		}
 	}
 	
-	free(aux); free(aux2), free(aux3); free(aux4);
+	free(aux); free(aux2);
 	return 0;
 }
 
@@ -95,18 +96,18 @@ int percola(int *red, int n){
 
 void llenar(int *red, int n, float prob){
 	int i;
-	//float res;
+	float res;
 	for(i=0; i<n*n; i++) {
 		red[i] = 0;
-		/*res = (float)rand()/(float)RAND_MAX;
+		res = (float)rand()/(float)RAND_MAX;
 		if(res<prob){
 			red[i] = 1;
-		}*/
+		}
 	}
 //Pongo una matriz a eleccion, que deberia percolar
-	for(i=n; i<2*n; i++) {
+/*	for(i=n; i<2*n; i++) {
 		red[i]=1; 
-	}
+	}*/
 	
 }
 
@@ -203,10 +204,10 @@ int hoshen(int *red,int n){
    		}
 
     }
-  printf("\n \n");
+//  printf("\n \n");
 
   corregir_etiqueta(red,clase,n);
-  imprimir_clase(clase, frag);  
+//  imprimir_clase(clase, frag);  
 
   free(clase);
 
