@@ -14,9 +14,10 @@ int hoshen(int *red,int n);
 int   actualizar(int *red,int *clase,int s,int frag);
 void  etiqueta_falsa(int *red,int *clase,int s1,int s2);
 void  corregir_etiqueta(int *red,int *clase,int n);
-int  percola(int *red,int n);
+int   percola(int *red,int n);
 void imprimir_clase(int *clase, int frag);
-void imprimir_extremos(int *arriba, int *abajo, int n);
+void imprimir_aux(int *aux, int n);
+int percola(int *red, int n);
 
 int main(){
 	int i, j, *red, *red_ini, n, z;
@@ -28,19 +29,21 @@ int main(){
 /*
   for(i=0;i<z;i++)
     {*/
-  prob=0.7;
-  denominador=2.0;
+ 	prob=0.5;
+  	denominador=2.0;
  
-  srand(time(NULL));
+  	srand(time(NULL));
 /*
       for(j=0;j<P;j++) //no menos de 13 iteraciones (P>13)
         {*/
-  llenar(red,n,prob);
+  	llenar(red,n,prob);
 
-  for(i=0;i<n*n;i++) red_ini[i] = red[i]; 
+  	for(i=0;i<n*n;i++) red_ini[i] = red[i]; 
 
-  imprimir(red_ini,n);
-  hoshen(red,n);      
+  	imprimir(red_ini,n);
+  	hoshen(red,n);     
+   if (percola(red,n)==1) printf("PERCOLO WACHO!");
+	else printf("NO PERCOLO NADAAA!"); 
   //      denominador=2.0*denominador;
 /*
           if (percola(red,n)) 
@@ -57,6 +60,28 @@ int main(){
 	free(red);
 	return 0;
 }
+
+int percola(int *red, int n){
+
+	int i, j, *aux, *aux2;
+	aux = (int *)malloc(n*sizeof(int));
+	aux2 = (int *)malloc(n*sizeof(int));
+
+	for (i=0; i<n; i++){ 
+		aux[i] = red[i];
+		aux2[i] = red[(n-1)*n + i];
+	}
+
+	for (i=0; i<n; i++){
+		for (j=0;j<n;j++){
+			if((aux[i] - aux2[j] == 0) && aux[i]>0) { return 1; continue; }
+		}
+	}
+	free(aux); free(aux2);
+	return 0;
+}
+
+
 
 void llenar(int *red, int n, float prob){
 	int i;
@@ -93,55 +118,6 @@ int   actualizar(int *red,int *clase,int s,int frag){
 		*red = s;
 		return frag;
 	}
-}
-
-void etiqueta_falsa(int *red, int *clase, int s1, int s2){  // pone etiquetas falsas en vector auxiliar "clase"
-
-		while(clase[s1]<0) s1 = -clase[s1];
-		while(clase[s2]<0) s2 = -clase[s2];	
-		if(s2 > s1){
-			 clase[s2] = -s1;	
-			 *red = s1;		
-		}
-		else if (s2 < s1){
-			 clase[s1] = -s2;	
-			 *red = s2;	
-		}
-		else {
-			*red=s1;	
-		}	
-}
-
-void corregir_etiqueta(int *red, int *clase, int n){  // corrije etiquetas en la red.
-
-	int i,s;
-	for(i=0;i<n*n;i++){
-		s = red[i]; 
-		while(clase[s]<0) s = -clase[s];
-		red[i] = s;
-	
-	}
-
-
-}
-
-int percola(int *red,int n){
-	int b, *arriba, *abajo; //, *izq, *der;
-	arriba = (int *)malloc(n*sizeof(int)); 
-	abajo= (int *)malloc(n*sizeof(int)); 
-	//izq = (int *)malloc(n*sizeof(int)); 
-	//der = (int *)malloc(n*sizeof(int)); 
-	for(b=0;b<n;b++){
-		arriba[b] = 0;
-		if(red[b]>0){
-			arriba[red[b]]=1; //Si hay un 2 en la 1era fila de red, pone un 1 en la posicion 2 de este vector
-			abajo[b] = 0;
-			abajo[red[n*n-n+b]]=1;
-		}
-	}
-//COMENTARIO: Deberian existir como mucho n clusters, o sea n numeros distintos en la matriz. 
-//Pero a veces pasa que un numero supera n. Entonces cuanto deberian medir los vectores arriba, abajo, etc?
-//Despues hay que restarlos para ver si percolo
 }
 
 int hoshen(int *red,int n){
@@ -215,9 +191,7 @@ int hoshen(int *red,int n){
   printf("\n \n");
 
   corregir_etiqueta(red,clase,n);
-  imprimir_clase(clase, frag); 
-//copio aca lo que dice percola asi lo imprime
-  imprimir_extremos(arriba, abajo, n); 
+  imprimir_clase(clase, frag);  
 
   free(clase);
 
@@ -225,23 +199,38 @@ int hoshen(int *red,int n){
 }
 
 
+void etiqueta_falsa(int *red, int *clase, int s1, int s2){  // pone etiquetas falsas en vector auxiliar "clase"
+
+		while(clase[s1]<0) s1 = -clase[s1];
+		while(clase[s2]<0) s2 = -clase[s2];	
+		if(s2 > s1){
+			 clase[s2] = -s1;	
+			 *red = s1;		
+		}
+		else if (s2 < s1){
+			 clase[s1] = -s2;	
+			 *red = s2;	
+		}
+		else {
+			*red=s1;	
+		}	
+}
+
+void corregir_etiqueta(int *red, int *clase, int n){  // corrije etiquetas en la red.
+
+	int i,s;
+	for(i=0;i<n*n;i++){
+		s = red[i]; 
+		while(clase[s]<0) s = -clase[s];
+		red[i] = s;
+	
+	}
+}
+
 void imprimir_clase(int *clase, int frag){
 	int k;
 	for(k=0;k<frag;k++){
 		printf("%d ",*(clase+k));
-	}
-	printf("\n ");
-}
-
-void imprimir_extremos(int *arriba, int *abajo, int n){
-	int k;
-	for(k=0;k<n;k++){
-		printf("%d ",*(arriba+k));
-	}
-	printf("\n ");
-
-for(k=0;k<n;k++){
-		printf("%d ",*(abajo+k));
 	}
 	printf("\n ");
 }
