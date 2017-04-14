@@ -1,18 +1,11 @@
-
-
-	for(k=0;k<frag;k++){
-		printf("%d ",*(clase+k));
-	}
-	printf("\n ");
-}
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
 
 #define P     16             // 1/2^P, P=16
-#define Z     100          // iteraciones    27000
-#define N     4          // lado de la red simulada
+#define Z     27000          // iteraciones    27000
+#define N     128         // lado de la red simulada
 
 
 void llenar(int *red, int n, float prob);
@@ -27,44 +20,45 @@ void imprimir_aux(int *aux, int n);
 int percola(int *red, int n);
 
 int main(){
-	  int i, j, *red, *red_ini, n, z;
-	  float semilla, prob, denominador;
-	  n=N;
+	int i, j, *red, *red_ini, n, z, percola_aux; // semilla;
+	float prob, denominador;
+	n=N;
   	z=Z;
-	  red = (int *)malloc(n*n*sizeof(int));
-  	red_ini = (int *)malloc(n*n*sizeof(int)); 
-		semilla = 1.0; //time(NULL);
-		FILE *f1;
-		f1 = fopen("L10.txt", "a");  // Archivo con valores de "p" que percolan, para red de dim L. (CAMBIAR PARA CADA L)
 
-  for(i=0;i<z;i++)
+	red = (int *)malloc(n*n*sizeof(int));
+  	red_ini = (int *)malloc(n*n*sizeof(int)); 
+	FILE *f1; 
+	f1 = fopen("L128.txt", "a");
+
+   for(i=0;i<z;i++)
     {
  	  prob=0.5;
-  	denominador=2.0;
- 
-  	srand(semilla);
-	  semilla++; 
+  	  denominador=2.0;
+//   semilla = i; //time(NULL);   
+  	  srand(i); // Para cada realización hay que cambiar la semilla. 
+
     for(j=0;j<P;j++) //no menos de 13 iteraciones (P>13)
         {
-  				llenar(red,n,prob);
+  		  llenar(red,n,prob);
+    	  hoshen(red,n);     
+        denominador=2.0*denominador;
 
-// 				for(i=0;i<n*n;i++) red_ini[i] = red[i]; 
-
-// 				imprimir(red_ini,n);
-  				hoshen(red,n);     
-    /*			if (percola(red,n)==1) printf("PERCOLO WACHO!");
-	  			else printf("NO PERCOLO NADAAA!"); */ 
-          denominador=2.0*denominador;
-
-          if (percola(red,n)) prob+=(-1.0/denominador);					
-	        else prob+=(1.0/denominador);
-		      //ir guardando en cada paso prob/N que percolan 
+        if (percola(red,n)){
+			 prob+=(-1.0/denominador);					
+			 percola_aux = 1;
+		  }		
+	     else{ 
+	    	 prob+=(1.0/denominador);
+			 percola_aux = 0;
+			      //ir guardando en cada paso prob/N que percolan 
         }
-		 fprintf(f1,"%f \n", prob);	
+
+       }
+     if(percola_aux==1) fprintf(f1,"%f \n", prob);	 // Se fija si el último prob que sale del ciclo for, hizo que la red percole. 
      }
 	  printf("\n \n");
-  	imprimir(red, n);
-		fclose(f1);
+  	  imprimir(red, n);
+	  fclose(f1);
 	  free(red);
 	  return 0;
 }
@@ -250,3 +244,28 @@ void imprimir_clase(int *clase, int frag){
 	}
 	printf("\n ");
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*  RESULTADOS
+(1)
+	a)  promedios:
+			p(L=4) = 0.60569366150087789
+			p(L=16) =  0.60893234053769107
+			p(L=32) = 0.6062161695642686
+			p(L=64) = 0.60051340202576897
+			p(L=128) = 0.59679733350664788
+
+		medianas:
+			p(L=4) = 0.60535399999999995
+			p(L=16) =  0.61048100000000005
+			p(L=32) = 0.605904
+			p(L=64) = 0.598549
+			p(L=128) = 0.59595500000000001
+		
+
+
+
+
+
+*/
