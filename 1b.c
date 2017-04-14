@@ -1,5 +1,15 @@
 
 // CÓDIGO PARA REALIZAR EL PUNTO 1b)
+
+// Estimaciones de Pc:
+/*  En cada ciclo, "p" aumenta de a pasos de 0.01
+L=4; Pc = 0.570000
+L=16; Pc = 0.590000
+L=32; Pc = 0.600000
+L=64; Pc = 0.600000
+
+
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -7,7 +17,7 @@
 
 #define P     16             // 1/2^P, P=16
 #define Z     27000          // iteraciones    27000
-#define N     128         // lado de la red simulada
+#define N     64         // lado de la red simulada
 #define PASO 0.05   // paso de probabilidad
 
 void llenar(int *red, int n, float prob);
@@ -22,7 +32,7 @@ void imprimir_aux(int *aux, int n);
 int percola(int *red, int n);
 
 int main(){
-	int i, j, *red, *red_ini, n, z; // semilla;
+	int i, j, *red, *red_ini, n, z, cond; // semilla;
 	float prob, Fp, percola_cont, paso;
 	n=N;
   	z=Z;
@@ -31,7 +41,7 @@ int main(){
   	red_ini = (int *)malloc(n*n*sizeof(int)); 
 	FILE *f1; 
 	f1 = fopen("Fp_128.txt", "a");
-   
+   cond = 0;
  	prob=0.0;
 
 	for(j=0; j<100; j++){
@@ -46,6 +56,11 @@ int main(){
    	}
 		 //printf("%f  \n",percola_cont);
 		 Fp = percola_cont/27000;  
+		 if (percola_cont >= 13500 && cond==0){ // Con esto me fijo cuando la red percola al menos la mitad de las veces, para estimar Pc.
+			printf("L=64; Pc = %f",prob);			
+			cond = 1;
+//			break;
+		 }
 		 //printf("%f  \n \n",Fp);
 		 fprintf(f1,"%f \n", Fp);	 
 		 prob = prob+paso;
@@ -53,7 +68,9 @@ int main(){
 	  printf("\n \n");
  	  //imprimir(red, n);
 	  fclose(f1);
+	  free(f1);	
 	  free(red);
+	  	 	
 	  return 0;
 }
 
@@ -239,27 +256,3 @@ void imprimir_clase(int *clase, int frag){
 	printf("\n ");
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*  RESULTADOS
-(1)
-	a)  promedios:
-			p(L=4) = 0.60569366150087789
-			p(L=16) =  0.60893234053769107
-			p(L=32) = 0.6062161695642686
-			p(L=64) = 0.60051340202576897
-			p(L=128) = 0.59679733350664788
-
-		medianas:
-			p(L=4) = 0.60535399999999995
-			p(L=16) =  0.61048100000000005
-			p(L=32) = 0.605904
-			p(L=64) = 0.598549
-			p(L=128) = 0.59595500000000001
-		
-
-
-
-
-
-*/
