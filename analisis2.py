@@ -4,7 +4,7 @@ Created on Fri Apr 14 14:20:01 2017
 
 @author: dran
 """
-## CÓDIGO PARA EL PUNTO 1b) 
+## PUNTO 1b) 
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,3 +26,24 @@ plt.title('F(p).dp para L = 128')
 plt.xlabel('p')
 plt.ylabel('F(p).dp')
 plt.show()
+###################################################################
+
+# PUNTO 1c) 
+# Las dispersiones las calcula usando las listas de probabilidades del punto 1a) 
+# Hay que poner en la carpeta los archivos L4.txt, L16.txt... del punto 1a) !!!
+L4 = np.loadtxt("L4.txt")
+L16 = np.loadtxt("L16.txt")
+L32 = np.loadtxt("L32.txt")
+L64 = np.loadtxt("L64.txt")
+L128 = np.loadtxt("L128.txt")
+
+# Calcula las varianzas.
+std = [ np.std(L4),  np.std(L16),  np.std(L32),  np.std(L64),  np.std(L128)]
+L = [4, 16, 32 , 64, 128]  ## tamaños de red
+
+plt.plot(L,std,'-bo', linewidth=1.8)
+plt.title('Desviaciones estandar para Pc')
+plt.xlabel('p')
+plt.ylabel('sigma')
+plt.show()
+
