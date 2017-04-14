@@ -17,14 +17,13 @@ Prom_128 = np.mean(L128)
 Pc_prom = [Prom_4, Prom_16, Prom_32, Prom_64, Prom_128]
 
 #1)b)
-#Me parce que no es esto.
-#Deberiamos agarrar una probabilidad y repetir varias veces y guardar otro txt que diga si percolò o no para esa probabilidad y hacer histograma
-Med_4 = np.median(L4)
-Med_16 = np.median(L16)
-Med_32 = np.median(L32)
-Med_64 = np.median(L64)
-Med_128 = np.median(L128)
+#Ponele que pi=i/#iteraciones asi estan equiespaciados
+datoshist = np.loadtxt("datoshist.txt") #Cantidad de veces que percoló para cada p
 
+plt.hist(datoshist[:,1], 1/len(datoshist[:,0]), range=[0,1], color = 'c', alpha=0.5) 
+plt.title('Histograma')
+plt.draw()
+plt.show()
 
 #1)c) 
 def suma(vector, prom):
